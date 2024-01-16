@@ -1,5 +1,6 @@
 package com.oscar.springbootmall.dao.impl;
 
+import com.oscar.springbootmall.constant.ProductCategory;
 import com.oscar.springbootmall.dao.ProductDao;
 import com.oscar.springbootmall.dto.ProductRequest;
 import com.oscar.springbootmall.model.Product;
@@ -20,11 +21,23 @@ public class ProductDaoImpl implements ProductDao {
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     @Override
-    public List<Product> getProducts() {
-        String sql="select product_id,product_name, category, image_url, price, stock, description, " +
+    public List<Product> getProducts(ProductCategory category, String search) {
+        String sql = "select product_id,product_name, category, image_url, price, stock, description, " +
                 "created_date, last_modified_date " +
-                "from product";
+                "from product where 1=1";
+
         HashMap<String, Object> map = new HashMap<>();
+        //分類篩選
+        if (category != null) {
+            sql += " AND category = :category";
+            map.put("category", category.name());
+        }
+        //產品名模糊查詢
+        if(search != null){
+            sql += " AND product_Name LIKE :search";
+            map.put("search", "%"+search+"%");
+        }
+
         List<Product> productList = namedParameterJdbcTemplate.query(sql, map, new ProdcutRowMapper());
         return productList;
     }
@@ -48,6 +61,7 @@ public class ProductDaoImpl implements ProductDao {
             return null;
         }
     }
+
     //新增一個商品
     @Override
     public Integer createProduct(ProductRequest productRequest) {
@@ -70,12 +84,13 @@ public class ProductDaoImpl implements ProductDao {
         GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
 
         // 執行新增操作，並將生成的主鍵保存到keyHolder中
-        namedParameterJdbcTemplate.update(sql,new MapSqlParameterSource(map),keyHolder);
+        namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(map), keyHolder);
 
         // 從keyHolder中獲取產品ID，並返回該ID
-        int productId=keyHolder.getKey().intValue();
+        int productId = keyHolder.getKey().intValue();
         return productId;
     }
+
     //更新一個商品
     @Override
     public void updateProduct(Integer productId, ProductRequest productRequest) {
@@ -85,7 +100,7 @@ public class ProductDaoImpl implements ProductDao {
                 "where product_id =:productId";
         // 創建一個HashMap來儲存SQL語句中的參數和它們對應的值
         HashMap<String, Object> map = new HashMap<>();
-        map.put("productId",productId);
+        map.put("productId", productId);
 
         map.put("productName", productRequest.getProductName());
         map.put("category", productRequest.getCategory().toString());
@@ -98,15 +113,16 @@ public class ProductDaoImpl implements ProductDao {
         // 執行新增操作
         namedParameterJdbcTemplate.update(sql, map);
     }
+
     //刪除一個商品
     @Override
     public void deleteProduct(Integer productId) {
-        String sql="DELETE FROM product WHERE product_id=:productId";
+        String sql = "DELETE FROM product WHERE product_id=:productId";
         // 創建一個HashMap來儲存SQL語句中的參數和它們對應的值
         HashMap<String, Object> map = new HashMap<>();
-        map.put("productId",productId);
+        map.put("productId", productId);
         // 執行刪除操作
-        namedParameterJdbcTemplate.update(sql,map);
+        namedParameterJdbcTemplate.update(sql, map);
     }
 
 

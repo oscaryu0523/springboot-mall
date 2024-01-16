@@ -1,5 +1,6 @@
 package com.oscar.springbootmall.service.impl;
 
+import com.oscar.springbootmall.constant.ProductCategory;
 import com.oscar.springbootmall.dao.ProductDao;
 import com.oscar.springbootmall.dto.ProductRequest;
 import com.oscar.springbootmall.model.Product;
@@ -13,10 +14,12 @@ import java.util.List;
 public class ProductServiceImpl implements ProductService {
     @Autowired
     private ProductDao productDao;
+
     @Override
-    public List<Product> getProducts() {
-        return productDao.getProducts();
+    public List<Product> getProducts(ProductCategory category, String search) {
+        return productDao.getProducts(category, search);
     }
+
     @Override
     public Product getByProductId(Integer productId) {
         return productDao.getProductById(productId);
@@ -29,7 +32,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void updateProduct(Integer productId, ProductRequest productRequest) {
-        productDao.updateProduct(productId,productRequest);
+        productDao.updateProduct(productId, productRequest);
     }
 
     @Override

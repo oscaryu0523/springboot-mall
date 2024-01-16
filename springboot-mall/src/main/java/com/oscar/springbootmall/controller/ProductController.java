@@ -1,5 +1,6 @@
 package com.oscar.springbootmall.controller;
 
+import com.oscar.springbootmall.constant.ProductCategory;
 import com.oscar.springbootmall.dto.ProductRequest;
 import com.oscar.springbootmall.model.Product;
 import com.oscar.springbootmall.service.ProductService;
@@ -19,8 +20,12 @@ public class ProductController {
 
     //查詢商品列表
     @GetMapping("/products")
-    public ResponseEntity<List<Product>> getProducts(){
-       List<Product> productList = productService.getProducts();
+    public ResponseEntity<List<Product>> getProducts(
+            @RequestParam (required = false) ProductCategory category,
+            @RequestParam (required = false) String search){
+
+       List<Product> productList = productService.getProducts(category,search);
+
        return ResponseEntity.status(HttpStatus.OK).body(productList);
     }
 
