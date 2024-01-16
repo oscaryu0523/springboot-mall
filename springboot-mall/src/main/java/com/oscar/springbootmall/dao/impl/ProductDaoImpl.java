@@ -66,7 +66,7 @@ public class ProductDaoImpl implements ProductDao {
         int productId=keyHolder.getKey().intValue();
         return productId;
     }
-
+    //更新一個商品
     @Override
     public void updateProduct(Integer productId, ProductRequest productRequest) {
         String sql = "UPDATE product SET product_name =:productName, category =:category, " +
@@ -87,5 +87,15 @@ public class ProductDaoImpl implements ProductDao {
         map.put("lastModifiedDate", new Date());
         // 執行新增操作
         namedParameterJdbcTemplate.update(sql, map);
+    }
+    //刪除一個商品
+    @Override
+    public void deleteProduct(Integer productId) {
+        String sql="DELETE FROM product WHERE product_id=:productId";
+        // 創建一個HashMap來儲存SQL語句中的參數和它們對應的值
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("productId",productId);
+        // 執行刪除操作
+        namedParameterJdbcTemplate.update(sql,map);
     }
 }
