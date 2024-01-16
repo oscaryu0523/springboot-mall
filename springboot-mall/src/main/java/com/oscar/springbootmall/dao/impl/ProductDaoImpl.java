@@ -19,6 +19,16 @@ public class ProductDaoImpl implements ProductDao {
     @Autowired
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
+    @Override
+    public List<Product> getProducts() {
+        String sql="select product_id,product_name, category, image_url, price, stock, description, " +
+                "created_date, last_modified_date " +
+                "from product";
+        HashMap<String, Object> map = new HashMap<>();
+        List<Product> productList = namedParameterJdbcTemplate.query(sql, map, new ProdcutRowMapper());
+        return productList;
+    }
+
     //用編號查詢一個商品
     @Override
     public Product getProductById(Integer productId) {
@@ -98,4 +108,6 @@ public class ProductDaoImpl implements ProductDao {
         // 執行刪除操作
         namedParameterJdbcTemplate.update(sql,map);
     }
+
+
 }
