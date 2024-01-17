@@ -5,7 +5,7 @@ import com.oscar.springbootmall.dao.ProductDao;
 import com.oscar.springbootmall.dto.ProductQueryParams;
 import com.oscar.springbootmall.dto.ProductRequest;
 import com.oscar.springbootmall.model.Product;
-import com.oscar.springbootmall.rowmapper.ProdcutRowMapper;
+import com.oscar.springbootmall.rowmapper.ProductRowMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -31,18 +31,24 @@ public class ProductDaoImpl implements ProductDao {
 
         ProductCategory category = productQueryParams.getCategory();
         String search = productQueryParams.getSearch();
+        String orderBy = productQueryParams.getOrderBy();
+        String sort = productQueryParams.getSort();
         //分類篩選
         if (category != null) {
             sql += " AND category = :category";
             map.put("category", category.name());
         }
         //產品名模糊查詢
-        if(search != null){
+        if (search != null) {
             sql += " AND product_Name LIKE :search";
-            map.put("search", "%"+search+"%");
+            map.put("search", "%" + search + "%");
         }
+        //排序
+        sql += " ORDER BY " + orderBy + " " + sort;
+        System.out.println(sql);
 
-        List<Product> productList = namedParameterJdbcTemplate.query(sql, map, new ProdcutRowMapper());
+
+        List<Product> productList = namedParameterJdbcTemplate.query(sql, map, new ProductRowMapper());
         return productList;
     }
 
@@ -57,7 +63,7 @@ public class ProductDaoImpl implements ProductDao {
         HashMap<String, Object> map = new HashMap<>();
         map.put("productId", productId);
         //執行查詢語句，經過rowmapper返回java物件
-        List<Product> productList = namedParameterJdbcTemplate.query(sql, map, new ProdcutRowMapper());
+        List<Product> productList = namedParameterJdbcTemplate.query(sql, map, new ProductRowMapper());
         //如果集合不為空，返回第一個物件
         if (productList.size() > 0) {
             return productList.get(0);
