@@ -5,6 +5,7 @@ import com.oscar.springbootmall.dto.ProductQueryParams;
 import com.oscar.springbootmall.dto.ProductRequest;
 import com.oscar.springbootmall.model.Product;
 import com.oscar.springbootmall.service.ProductService;
+import com.oscar.springbootmall.util.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +25,7 @@ public class ProductController {
 
     //查詢商品列表
     @GetMapping("/products")
-    public ResponseEntity<List<Product>> getProducts(
+    public ResponseEntity<Page<Product>> getProducts(
             //查詢條件
             @RequestParam (required = false) ProductCategory category,
             @RequestParam (required = false) String search,
@@ -34,7 +35,7 @@ public class ProductController {
             @RequestParam (defaultValue = "desc") String sort,
 
             //分頁
-            @RequestParam (defaultValue = "10") @Max(1000) @Min(0) Integer limit,
+            @RequestParam (defaultValue = "5") @Max(1000) @Min(0) Integer limit,
             @RequestParam (defaultValue = "0") @Min(0) Integer offset
     ){
         ProductQueryParams productQueryParams = new ProductQueryParams();
@@ -45,9 +46,20 @@ public class ProductController {
         productQueryParams.setLimit(limit);
         productQueryParams.setOffset(offset);
 
+        //取得productList
         List<Product> productList = productService.getProducts(productQueryParams);
 
-       return ResponseEntity.status(HttpStatus.OK).body(productList);
+        //查詢總數
+        Integer total=productService.countTotal(productQueryParams);
+
+        //分頁
+        Page<Product> page = new Page<>();
+        page.setLimit(limit);
+        page.setOffset(offset);
+        page.setTotal(total);
+        page.setResults(productList);
+
+        return ResponseEntity.status(HttpStatus.OK).body(page);
     }
 
     //根據商品編號查詢單一商品

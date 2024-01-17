@@ -20,7 +20,31 @@ import java.util.List;
 public class ProductDaoImpl implements ProductDao {
     @Autowired
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    //查詢商品總數
+    @Override
+    public Integer countTotal(ProductQueryParams productQueryParams) {
+        String sql="SELECT count(*) FROM product WHERE 1=1";
 
+        HashMap<String, Object> map = new HashMap<>();
+
+        ProductCategory category = productQueryParams.getCategory();
+        String search = productQueryParams.getSearch();
+
+        //分類篩選
+        if (category != null) {
+            sql += " AND category = :category";
+            map.put("category", category.name());
+        }
+        //產品名模糊查詢
+        if (search != null) {
+            sql += " AND product_Name LIKE :search";
+            map.put("search", "%" + search + "%");
+        }
+
+        Integer total = namedParameterJdbcTemplate.queryForObject(sql, map, Integer.class);
+        return total;
+    }
+    //商品列表(複合查詢、排序、分頁)
     @Override
     public List<Product> getProducts(ProductQueryParams productQueryParams) {
         String sql = "select product_id,product_name, category, image_url, price, stock, description, " +
@@ -140,6 +164,7 @@ public class ProductDaoImpl implements ProductDao {
         // 執行刪除操作
         namedParameterJdbcTemplate.update(sql, map);
     }
+
 
 
 }
