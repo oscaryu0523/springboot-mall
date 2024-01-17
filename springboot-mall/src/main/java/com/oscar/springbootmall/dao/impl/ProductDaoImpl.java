@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class ProductDaoImpl implements ProductDao {
@@ -30,16 +31,8 @@ public class ProductDaoImpl implements ProductDao {
         ProductCategory category = productQueryParams.getCategory();
         String search = productQueryParams.getSearch();
 
-        //分類篩選
-        if (category != null) {
-            sql += " AND category = :category";
-            map.put("category", category.name());
-        }
-        //產品名模糊查詢
-        if (search != null) {
-            sql += " AND product_Name LIKE :search";
-            map.put("search", "%" + search + "%");
-        }
+        //分類篩選及產品名模糊查詢
+        sql = addFilteringSql(sql,map,productQueryParams);
 
         Integer total = namedParameterJdbcTemplate.queryForObject(sql, map, Integer.class);
         return total;
@@ -53,28 +46,14 @@ public class ProductDaoImpl implements ProductDao {
 
         HashMap<String, Object> map = new HashMap<>();
 
-        ProductCategory category = productQueryParams.getCategory();
-        String search = productQueryParams.getSearch();
-        String orderBy = productQueryParams.getOrderBy();
-        String sort = productQueryParams.getSort();
-        Integer limit = productQueryParams.getLimit();
-        Integer offset = productQueryParams.getOffset();
-        //分類篩選
-        if (category != null) {
-            sql += " AND category = :category";
-            map.put("category", category.name());
-        }
-        //產品名模糊查詢
-        if (search != null) {
-            sql += " AND product_Name LIKE :search";
-            map.put("search", "%" + search + "%");
-        }
+        //分類篩選及產品名模糊查詢
+        sql = addFilteringSql(sql,map,productQueryParams);
         //排序
-        sql += " ORDER BY " + orderBy + " " + sort;
+        sql += " ORDER BY " + productQueryParams.getOrderBy() + " " + productQueryParams.getSort();
         //分頁
         sql += " LIMIT :limit OFFSET :offset";
-        map.put("limit",limit);
-        map.put("offset",offset);
+        map.put("limit",productQueryParams.getLimit());
+        map.put("offset",productQueryParams.getOffset());
 
 
 
@@ -165,6 +144,18 @@ public class ProductDaoImpl implements ProductDao {
         namedParameterJdbcTemplate.update(sql, map);
     }
 
-
+    //分類篩選及產品名模糊查詢
+    private String addFilteringSql(String sql, Map <String,Object> map, ProductQueryParams productQueryParams){
+        if (productQueryParams.getCategory() != null) {
+            sql += " AND category = :category";
+            map.put("category", productQueryParams.getCategory().name());
+        }
+        //產品名模糊查詢
+        if (productQueryParams.getSearch() != null) {
+            sql += " AND product_Name LIKE :search";
+            map.put("search", "%" + productQueryParams.getSearch() + "%");
+        }
+        return sql;
+    }
 
 }
