@@ -1,6 +1,7 @@
 package com.oscar.springbootmall.service.impl;
 
 import com.oscar.springbootmall.dao.UserDao;
+import com.oscar.springbootmall.dto.UserLoginRequest;
 import com.oscar.springbootmall.dto.UserRegisterRequest;
 import com.oscar.springbootmall.model.User;
 import com.oscar.springbootmall.service.UserService;
@@ -17,7 +18,7 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserDao userDao;
-
+    //註冊
     @Override
     public Integer register(UserRegisterRequest userRegisterRequest) {
         //檢查註冊的email
@@ -30,9 +31,26 @@ public class UserServiceImpl implements UserService {
         //創建帳號
         return userDao.createUser(userRegisterRequest);
     }
-
+    //取得user資料
     @Override
     public User getUserById(Integer userId) {
         return userDao.getUserById(userId);
+    }
+    //登入
+    @Override
+    public User login(UserLoginRequest userLoginRequest) {
+        //檢查email帳號是否註冊
+        User user = userDao.getUserByEmail(userLoginRequest.getEmail());
+        if(user==null){
+            log.warn("該 email {} 尚未註冊",userLoginRequest.getEmail());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
+        //檢查密碼是否正確
+        if(user.getPassword().equals(userLoginRequest.getPassword())) {
+            return user;
+        }else{
+            log.warn("該 email {} 的密碼不正確",userLoginRequest.getEmail());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
     }
 }
