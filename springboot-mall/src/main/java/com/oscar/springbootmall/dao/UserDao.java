@@ -4,7 +4,8 @@ import com.oscar.springbootmall.dto.UserRegisterRequest;
 import com.oscar.springbootmall.model.User;
 
 public interface UserDao {
-    public Integer register(UserRegisterRequest userRegisterRequest);
-    public User getUserById(Integer userId);
+    Integer createUser(UserRegisterRequest userRegisterRequest);
+    User getUserById(Integer userId);
+    User getUserByEmail(String email);
 
 }
