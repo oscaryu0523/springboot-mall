@@ -2,6 +2,7 @@ package com.oscar.springbootmall.dao.impl;
 
 import com.oscar.springbootmall.constant.ProductCategory;
 import com.oscar.springbootmall.dao.ProductDao;
+import com.oscar.springbootmall.dto.ProductQueryParams;
 import com.oscar.springbootmall.dto.ProductRequest;
 import com.oscar.springbootmall.model.Product;
 import com.oscar.springbootmall.rowmapper.ProdcutRowMapper;
@@ -21,12 +22,15 @@ public class ProductDaoImpl implements ProductDao {
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     @Override
-    public List<Product> getProducts(ProductCategory category, String search) {
+    public List<Product> getProducts(ProductQueryParams productQueryParams) {
         String sql = "select product_id,product_name, category, image_url, price, stock, description, " +
                 "created_date, last_modified_date " +
                 "from product where 1=1";
 
         HashMap<String, Object> map = new HashMap<>();
+
+        ProductCategory category = productQueryParams.getCategory();
+        String search = productQueryParams.getSearch();
         //分類篩選
         if (category != null) {
             sql += " AND category = :category";

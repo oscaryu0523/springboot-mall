@@ -4,7 +4,7 @@ import com.oscar.springbootmall.constant.ProductCategory;
 
 import javax.validation.constraints.NotNull;
 
-
+//新增修改時針對需要的參數錯誤驗證
 public class ProductRequest {
     @NotNull
     private String productName;
