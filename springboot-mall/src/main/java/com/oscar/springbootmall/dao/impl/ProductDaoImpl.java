@@ -33,6 +33,8 @@ public class ProductDaoImpl implements ProductDao {
         String search = productQueryParams.getSearch();
         String orderBy = productQueryParams.getOrderBy();
         String sort = productQueryParams.getSort();
+        Integer limit = productQueryParams.getLimit();
+        Integer offset = productQueryParams.getOffset();
         //分類篩選
         if (category != null) {
             sql += " AND category = :category";
@@ -45,7 +47,11 @@ public class ProductDaoImpl implements ProductDao {
         }
         //排序
         sql += " ORDER BY " + orderBy + " " + sort;
-        System.out.println(sql);
+        //分頁
+        sql += " LIMIT :limit OFFSET :offset";
+        map.put("limit",limit);
+        map.put("offset",offset);
+
 
 
         List<Product> productList = namedParameterJdbcTemplate.query(sql, map, new ProductRowMapper());
