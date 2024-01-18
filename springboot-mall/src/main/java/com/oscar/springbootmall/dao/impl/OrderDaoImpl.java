@@ -1,6 +1,8 @@
 package com.oscar.springbootmall.dao.impl;
 
 import com.oscar.springbootmall.dao.OrderDao;
+import com.oscar.springbootmall.dto.OrderQueryParams;
+import com.oscar.springbootmall.dto.ProductQueryParams;
 import com.oscar.springbootmall.model.Order;
 import com.oscar.springbootmall.model.OrderItem;
 import com.oscar.springbootmall.rowmapper.OrderItemRowMapper;
@@ -77,10 +79,10 @@ public class OrderDaoImpl implements OrderDao {
             return null;
         }
     }
-
+    //根據訂單編號查詢所有訂單明細
     @Override
     public List<OrderItem> getOrderItemsByOrderId(Integer orderId) {
-        String sql="SELECT oi.order_item_id, oi.order_id, oi.product_id, oi.quantity, oi.amount, p.product_Name, p.image_url " +
+        String sql="SELECT oi.order_item_id, oi.order_id, oi.product_id, oi.quantity, oi.amount, p.product_name, p.image_url " +
                 "FROM order_item oi " +
                 "LEFT JOIN product p on oi.product_id = p.product_id " +
                 "WHERE oi.order_id =:orderId";
@@ -91,5 +93,48 @@ public class OrderDaoImpl implements OrderDao {
         List orderItemList = namedParameterJdbcTemplate.query(sql, map, new OrderItemRowMapper());
 
         return orderItemList;
+    }
+    //根據userId查詢用戶的訂單
+    @Override
+    public List<Order> getOrders(OrderQueryParams orderQueryParams) {
+        String sql="SELECT order_id, user_id, total_amount, created_date, last_modified_date FROM `order` WHERE 1=1";
+
+        HashMap<String, Object> map = new HashMap<>();
+
+        //查詢條件
+        sql = addFilteringSql(sql, map, orderQueryParams);
+
+        //排序
+        sql += " ORDER BY created_date DESC";
+
+        //分頁
+        sql += " LIMIT :limit OFFSET :offset";
+        map.put("limit", orderQueryParams.getLimit());
+        map.put("offset", orderQueryParams.getOffset());
+
+        List orderList = namedParameterJdbcTemplate.query(sql, map, new OrderRowMapper());
+
+        return orderList;
+    }
+    //根據用戶id查詢訂單總筆數
+    @Override
+    public Integer countOrders(OrderQueryParams orderQueryParams) {
+        String sql="SELECT count(*) from `order` WHERE 1=1";
+
+        HashMap<String, Object> map = new HashMap<>();
+
+        sql=addFilteringSql(sql, map, orderQueryParams);
+
+        Integer total = namedParameterJdbcTemplate.queryForObject(sql, map, Integer.class);
+        return total;
+    }
+
+    //篩選用戶id
+    private String addFilteringSql(String sql, Map <String,Object> map,OrderQueryParams orderQueryParams){
+        if (orderQueryParams.getUserId() != null) {
+            sql += " AND user_id = :userId";
+            map.put("userId", orderQueryParams.getUserId());
+        }
+        return sql;
     }
 }
