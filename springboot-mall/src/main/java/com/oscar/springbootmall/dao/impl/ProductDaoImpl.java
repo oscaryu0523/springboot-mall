@@ -37,6 +37,8 @@ public class ProductDaoImpl implements ProductDao {
         Integer total = namedParameterJdbcTemplate.queryForObject(sql, map, Integer.class);
         return total;
     }
+
+
     //商品列表(複合查詢、排序、分頁)
     @Override
     public List<Product> getProducts(ProductQueryParams productQueryParams) {
@@ -130,6 +132,20 @@ public class ProductDaoImpl implements ProductDao {
         //更新最後修改時間
         map.put("lastModifiedDate", new Date());
         // 執行新增操作
+        namedParameterJdbcTemplate.update(sql, map);
+    }
+
+    //更新庫存數量
+    @Override
+    public void updateStock(Integer productId, Integer stock) {
+        String sql="UPDATE product SET stock = :stock, last_modified_date = :lastModifiedDate " +
+                "WHERE product_id =:productId";
+
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("stock", stock);
+        map.put("lastModifiedDate",new Date());
+        map.put("productId",productId);
+
         namedParameterJdbcTemplate.update(sql, map);
     }
 
